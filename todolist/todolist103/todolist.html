@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link rel="stylesheet" href="https://unpkg.com/todomvc-app-css@2.0.4/index.css">
+<link rel="stylesheet" href="https://unpkg.com/todomvc-common@1.0.5/base.css">
+
+</head>
+
+<body>
+    <section id="todolist" class="todoapp">
+        <header class="header">
+            <h1> todolist </h1>
+            <input class="new-todo" 
+                   autofocus autocomplete="off" 
+                   v-model="newTodo" 
+                   placeholder="What needs to be done?" 
+                   @keyup.enter="addTodo" />
+        </header>
+        <section class="main" v-show="todos.length">
+            <input class="toggle-all" type="checkbox" v-model="allDone">
+            <ul class="todo-list">
+                <li class="todo" 
+                    v-for="todo in filteredTodos" 
+                    :class="{ completed: todo.completed, editing: todo == editedTodo }">
+                    <div class="view">
+                        <input class="toggle" type="checkbox" v-model="todo.completed">
+                        <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
+                        <button class="destroy" @click="removeTodo(todo)"></button>
+                    </div>
+                    <input class="edit"   
+                           type="text" 
+                           v-model="todo.title" 
+                           v-todo-focus="todo == editedTodo" 
+                           @blur="doneEdit(todo)"
+                           @keyup.enter="doneEdit(todo)" 
+                           @keyup.esc="cancelEdit(todo)">
+                </li>
+            </ul>
+        </section>
+        <footer class="footer" v-show="todos.length">
+            <span class="todo-count">
+                <strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
+            </span>
+            <ul class="filters">
+                <li><a href="#/all" :class="{ selected: visibility == 'all' }">All</a></li>
+                <li><a href="#/active" :class="{ selected: visibility == 'active' }">Active</a></li>
+                <li><a href="#/completed" :class="{ selected: visibility == 'completed' }">Completed</a></li>
+            </ul>
+            <button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">Clear completed</button>
+        </footer> 
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.min.js"></script>
+    <script src="todolist.js"></script>
+</body>
+
+
+</html>
+
