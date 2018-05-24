@@ -42,7 +42,7 @@ var app =new Vue({
 
 	watch: {
 		todos: {
-			handler: function (todos) {
+			abc: function (todos) {
 				todoStorage.save(todos)
 			},
 			deep: true
@@ -78,6 +78,7 @@ var app =new Vue({
 		},
 
 		editTodo: function (todo) {
+			console.log(todo)
 			this.beforeEditCache = todo.title
 			this.editedTodo = todo
 		},
@@ -94,6 +95,7 @@ var app =new Vue({
 		},
 
 		cancelTodo: function (todo) {
+			console.log(todo)
 			this.editedTodo = null
 			todo.title = this.beforeEditCache
 		}

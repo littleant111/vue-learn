@@ -1,26 +1,27 @@
-var STORAGE_KEY = 'todos'
+//缓存
+var STORAGE_KEY = 'todolist-data'
 var todoStorage = {
-	fetch: function () {
-		var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-		todos.forEach(function (todo, index) {
-			todo.id = index
-		})
-		todoStorage.uid = todos.length
-		return todos
-	},
+  fetch: function () {
+    var todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    todos.forEach(function (todo, index) {
+      todo.id = index
+    })
+    todoStorage.uid = todos.length
+    return todos
+  },  
   save: function (todos) {
-  	localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
   }
 }
 
 var filters = {
-	all: function (todos) {
-    return todos
-	},
 	active: function (todos) {
 		return todos.filter(function (todo) {
 			return !todo.completed
 		})
+	},
+	all: function (todos) {
+		return todos
 	},
 	completed: function (todos) {
 		return todos.filter(function (todo) {
@@ -29,12 +30,14 @@ var filters = {
 	}
 }
 
+
 var app =new Vue({
 	el: '#todolist',
 	data: {
 		todos: todoStorage.fetch(),
 		newTodo: '',
-		visibility: 'all'
+		visibility: 'all',
+		editedTodo: null
 	},
 
 	watch: {
@@ -52,6 +55,58 @@ var app =new Vue({
 		}
 	},
 
+	methods: {
+		addTodo: function () {
+			var value = this.newTodo && this.newTodo.trim()
+			if (!value) {
+				return
+			}
+      this.todos.push({
+      	id: todoStorage.uid++,
+      	title: this.newTodo,
+      	completed: false
+      })
+      this.newTodo = ''
+		},
+
+		removeTodo: function (todo) {
+			this.todos.splice(this.todos.indexOf(todo), 1)
+		},
+
+		removeCompleted: function () {
+			this.todos = filters.active(this.todos)
+		},
+
+		editTodo: function (todo) {
+			console.log(todo.title)
+			this.beforeEditCache = todo.title
+			this.editedTodo = todo
+			// console.log(this.editedTodo)
+		},
+
+		doneEdit: function (todo) {
+			// console.log(todo)
+			if (!this.editedTodo) {
+				return
+			}
+			console.log(this)
+			this.editedTodo = null
+			console.log(this.title)
+			console.log(todo.title)
+			this.title = todo.title.trim()
+			console.log(this)
+			console.log(this.title)
+      if (!todo.title) {
+        this.removeTodo(todo)
+      }
+		},
+
+		cancelTodo: function (todo) {
+			this.editedTodo = null
+			todo.title = this.beforeEditCache
+		}
+	},
+
 	computed: {
 		filteredTodos () {
       return filters[this.visibility](this.todos)
@@ -60,44 +115,30 @@ var app =new Vue({
 			return filters.active(this.todos).length
 		},
 		allDone: {
-			get: function () {
-				return this.remaining === 0
+			get: function() {
+        return this.remaining === 0
 			},
-			set: function (value) {
-				console.log(value)
-				this.todos.forEach(function (todo) {
-					return todo.completed = value
-				})
+			set: function(value) {
+        this.todos.forEach(function (todo) {
+        	return todo.completed = value
+        })
 			}
 		}
 	},
 
-	methods: {
-		addTodo: function () {
-			var value = this.newTodo && this.newTodo.trim()
-			if (!value) {
-				return
+	directives: {
+		'todo-focus':function (el, binding) {
+			if (binding.value) {
+				el.focus()
 			}
-			this.todos.push({
-				id: todoStorage.uid++,
-				title: this.newTodo,
-				completed: false
-			})
-			this.newTodo = ''
-		},
-		removeTodo: function (todo) {
-			this.todos.splice(this.todos.indexOf(todo), 1)
-		},
-		removeCompleted: function() {
-      this.todos = filters.active(this.todos)
-    },
+		}
 	}
 })
 
 function onHashChange () {
 	var visibility = window.location.hash.replace(/#\/?/, '')
 	if (filters[visibility]) {
-     app.visibility = visibility
+		app.visibility = visibility
 	}else {
 		window.location.hash = ''
 		app.visibility = 'all'
